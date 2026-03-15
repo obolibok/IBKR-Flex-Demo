@@ -1,1 +1,1 @@
-.\.venv\Scripts\python -c "import os,sys; kit=r'D:\WORK\TraderStation\IBKR_PBI_Kit'; sys.path.insert(0,kit); from scripts.etl_run import run_update; print(run_update(kit, os.path.join(kit,'config.yaml')))"
+.\.venv\Scripts\python -c "import os,sys; kit=r'D:\WORK\IBKR-Flex-Demo'; sys.path.insert(0,kit); from scripts.etl_run import run_update; print(run_update(kit, os.path.join(kit,'config.yaml')))"

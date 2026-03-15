@@ -22,9 +22,9 @@ def load_config(path: str) -> Config:
         poll_seconds=raw["etl"]["poll_seconds"],
         max_wait_seconds=raw["etl"]["max_wait_seconds"],
         min_seconds_between_runs=raw["etl"]["min_seconds_between_runs"],
-        bronze=bool(etl.get("bronze", True)),
-        silver=bool(etl.get("silver", True)),
-        gold=bool(etl.get("gold", True)),
+        bronze=bool(raw["etl"].get("bronze", True)),
+        silver=bool(raw["etl"].get("silver", True)),
+        gold=bool(raw["etl"].get("gold", True)),
         obfuscate=bool(raw["etl"].get("obfuscate", False)),
     )
     paths = PathsCfg(

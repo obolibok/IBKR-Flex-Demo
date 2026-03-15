@@ -1,0 +1,6 @@
+/.venv
+/cache
+/history
+/scripts/__pycache__
+/scripts/jobs/__pycache__
+/scripts/tools/__pycache__

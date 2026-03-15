@@ -3,6 +3,8 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 cd /d "%~dp0"
 
+if not exist "cache" md "cache"
+
 for /f "delims=" %%F in ('dir /b /s /o:n ".\history\positions\*.xml"') do (
     echo.
     echo Importing: %%~nxF
