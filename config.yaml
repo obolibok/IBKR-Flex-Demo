@@ -1,0 +1,49 @@
+ibkr:
+  token: "<YOUR TOKEN>"
+  base_url: "https://ndcdyn.interactivebrokers.com/AccountManagement/FlexWebService"
+  version: 3
+
+etl:
+  poll_seconds: 10
+  max_wait_seconds: 300
+  min_seconds_between_runs: 120
+  pause_between_jobs_seconds: 3
+  bronze: true
+  silver: true
+  gold: true
+  obfuscate: true
+
+paths:
+  kit_root: "<REPOSITORY FOLDER>"
+  duckdb_path: "{kit_root}\\cache\\warehouse.duckdb"
+  gold_root: "{kit_root}\\cache\\mart"
+
+flex_jobs:
+  - id: trades
+    enabled: true
+    query_id: "<YOUR ID>"
+    handler: "scripts.jobs.trades_job:TradesJob"
+  - id: positions
+    enabled: true
+    query_id: "<YOUR ID>"
+    handler: "scripts.jobs.positions_job:PositionsJob"
+  - id: cash_transactions
+    enabled: true
+    query_id: "<YOUR ID>"
+    handler: "scripts.jobs.cash_transactions_job:CashTransactionsJob"
+  - id: account_nav
+    enabled: true
+    query_id: "<YOUR ID>"
+    handler: "scripts.jobs.nav_job:NavJob"
+  - id: ticker_yahoo_SPY
+    enabled: true
+    query_id: "SPY"
+    handler: "scripts.jobs.ticker_yahoo_job:TickerYahooJob"
+  - id: ticker_yahoo_QQQ
+    enabled: false
+    query_id: "QQQ"
+    handler: "scripts.jobs.ticker_yahoo_job:TickerYahooJob"
+  - id: ticker_yahoo_GSPC
+    enabled: false
+    query_id: "^GSPC"
+    handler: "scripts.jobs.ticker_yahoo_job:TickerYahooJob"
