@@ -17,6 +17,8 @@ class EtlCfg:
     poll_seconds: int
     max_wait_seconds: int
     min_seconds_between_runs: int
+    pause_between_jobs_seconds: int
+    initial_wait_seconds: int
     bronze: bool
     silver: bool
     gold: bool

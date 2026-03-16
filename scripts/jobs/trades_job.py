@@ -3,7 +3,7 @@ import datetime as dt
 import pandas as pd
 
 from scripts.jobs.base import FlexJob, JobContext, JobResult
-from scripts.ibkr_flex_client import flex_send_request, flex_get_statement_wait_query
+from scripts.ibkr_flex_client import flex_download_statement
 from scripts.parse_trades import parse_trades
 from scripts.etl_manifest import register_asset
 
@@ -70,12 +70,14 @@ class TradesJob(FlexJob):
                 return JobResult(self.job.id, self.job.query_id, "skipped", "throttled", None, None, 0)
 
         try:
-            ref = flex_send_request(cfg.ibkr, self.job.query_id)
-            xml_bytes = flex_get_statement_wait_query(
-                cfg.ibkr.base_url, cfg.ibkr.token, ref, cfg.ibkr.version,
-                cfg.etl.poll_seconds, cfg.etl.max_wait_seconds,
-            )
-
+            xml_bytes, ref = flex_download_statement(
+                                                    cfg=cfg.ibkr,
+                                                    query_id=self.job.query_id,
+                                                    poll_seconds=cfg.etl.poll_seconds,
+                                                    max_wait_seconds=cfg.etl.max_wait_seconds,
+                                                    initial_wait_seconds=cfg.etl.initial_wait_seconds,
+                                                    cycle_attempts=4,
+                                                    cycle_sleep_seconds=cfg.etl.pause_between_jobs_seconds,)
             df = pd.DataFrame(parse_trades(xml_bytes))
             con.register("df_in", df)
 
