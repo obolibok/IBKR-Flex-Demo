@@ -23,6 +23,10 @@ flex_jobs:
     enabled: true
     query_id: "<YOUR ID>"
     handler: "scripts.jobs.trades_job:TradesJob"
+  - id: corporate_actions
+    query_id: "<YOUR ID>"
+    enabled: true
+    handler: "scripts.jobs.corporate_actions_job:CorporateActionsJob"
   - id: positions
     enabled: true
     query_id: "<YOUR ID>"
