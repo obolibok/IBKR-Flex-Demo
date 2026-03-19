@@ -26,5 +26,8 @@ Demo project for processing data from IBKR to Power BI via Flex Reports
 12.  Save the report and now you can refresh it at any time
 
 ## Configuration
+To correct processing of Python and files you need to change a couple of Power Bi settings - File / Options and Settings / Options
+1. Global / Python scripting / Set a Python home directory. If you use .venv - point to `YOUR PATH\IBKR_PBI_Kit\.venv\Scripts`
+2. 
 ## Preparing Input Data
 ## Import History Data
