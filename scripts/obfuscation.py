@@ -27,6 +27,7 @@ _MONEY_LIKE_COLUMNS = {
     "netcash",
     "closeprice",
     "cost",
+    "costbasis",
     "fifopnlrealized",
     "mtmpnl",
     "marketvalue",
@@ -52,6 +53,7 @@ _MONEY_LIKE_COLUMNS = {
     "averageprice",
     "markprice",
     "strike",
+    "value",
 }
 
 # Обфусцируем только эти витрины.
@@ -63,6 +65,7 @@ _OBFUSCATE_DATASET_IDS = {
     "account_nav_latest",
     "account_nav_history",
     "symbols_dictionary",
+    "corporate_actions_history",
 }
 
 
@@ -192,8 +195,8 @@ def _default_expr(col_name: str) -> str:
     return f'src.{quoted} AS "{col_name}"'
 
 
-def _company_description_expr(symbol_col: str = "symbol", alias_suffix: str = "") -> str:
-    alias = f"m_{symbol_col}{alias_suffix}"
+def _company_description_expr(symbol_col: str = "symbol") -> str:
+    alias = f"m_{symbol_col}"
     return (
         f"CASE "
         f"WHEN {alias}.obfuscated_symbol IS NOT NULL THEN 'Company ' || {alias}.obfuscated_symbol "
@@ -207,8 +210,6 @@ def _cash_description_expr() -> str:
         CASE
             WHEN src."description" IS NULL THEN NULL
             WHEN m_symbol.obfuscated_symbol IS NULL THEN src."description"
-
-            -- случай вида: MSFT(US5949181045) CASH DIVIDEND ...
             WHEN regexp_matches(src."description", '^[A-Za-z0-9._-]+\([^)]+\)\s+.*')
                 THEN m_symbol.obfuscated_symbol || ' ' ||
                      regexp_replace(
@@ -216,10 +217,33 @@ def _cash_description_expr() -> str:
                          '^[A-Za-z0-9._-]+\([^)]+\)\s+',
                          ''
                      )
-
             ELSE src."description"
         END AS "description"
     '''
+
+
+def _corporate_action_description_expr() -> str:
+    return """
+        CASE
+            WHEN m_symbol.obfuscated_symbol IS NOT NULL
+                THEN 'Corporate action for ' || m_symbol.obfuscated_symbol
+            ELSE 'Corporate action'
+        END AS "description"
+    """
+
+
+def _corporate_action_action_description_expr() -> str:
+    return """
+        CASE
+            WHEN src."type" IS NOT NULL AND src."code" IS NOT NULL
+                THEN src."type" || ' / ' || src."code"
+            WHEN src."type" IS NOT NULL
+                THEN src."type"
+            WHEN src."code" IS NOT NULL
+                THEN src."code"
+            ELSE 'Corporate action'
+        END AS "actionDescription"
+    """
 
 
 def _make_select_sql(
@@ -252,6 +276,10 @@ def _make_select_sql(
             select_parts.append(_cash_description_expr())
         elif col_l == "description" and dataset_id in {"symbols_dictionary", "positions_latest", "positions_history"}:
             select_parts.append(_company_description_expr("symbol"))
+        elif col_l == "description" and dataset_id == "corporate_actions_history":
+            select_parts.append(_corporate_action_description_expr())
+        elif col_l == "actiondescription" and dataset_id == "corporate_actions_history":
+            select_parts.append(_corporate_action_action_description_expr())
         elif col_l in _MONEY_LIKE_COLUMNS:
             select_parts.append(_money_expr(col, factor))
         else:

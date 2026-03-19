@@ -184,7 +184,6 @@ class CorporateActionsJob(FlexJob):
             COPY (
                 SELECT
                     COALESCE(sy.map_to, ca.symbol) AS symbol,
-                    ca.underlyingSymbol,
                     ca.currency,
                     ca.assetCategory,
                     ca.subCategory,
@@ -199,16 +198,10 @@ class CorporateActionsJob(FlexJob):
                     ca.costBasis,
                     ca.fifoPnlRealized,
                     ca.mtmPnl,
-                    ca.securityID,
                     ca.securityIDType,
-                    ca.cusip,
-                    ca.isin,
-                    ca.figi,
                     ca.listingExchange,
                     ca.description,
-                    ca.actionDescription,
-                    ca.actionID,
-                    ca.transactionID
+                    ca.actionDescription
                 FROM bronze.corporate_actions ca
                 LEFT JOIN silver.symbols sy ON sy.symbol = ca.symbol AND sy.conid = ca.conid AND ca.description = sy.description
             )
