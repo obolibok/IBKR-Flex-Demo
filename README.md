@@ -27,7 +27,25 @@ Demo project for processing data from IBKR to Power BI via Flex Reports
 
 ## Configuration
 To correct processing of Python and files you need to change a couple of Power Bi settings - File / Options and Settings / Options
-1. Global / Python scripting / Set a Python home directory. If you use .venv - point to `YOUR PATH\IBKR_PBI_Kit\.venv\Scripts`
-2. 
+1. **GLOBAL / Python scripting / Set a Python home directory** : If you use .venv - point to `WORK FOlDER\IBKR_PBI_Kit\.venv\Scripts`, otherwise use the value detected by Power BI.
+<img width="1002" height="802" alt="image" src="https://github.com/user-attachments/assets/5494e997-045d-4238-8de4-746c40b356aa" />
+2. **CURRENT FILE / Data Load / Parallel loading** : Set to `One (disable parallel loading)`
+<img width="1002" height="802" alt="image" src="https://github.com/user-attachments/assets/36dbf801-cddc-40d0-bcda-5a7869da3291" />
+3. **CURRENT FILE / Privacy / Privacy Levels** : Set to `Ignore the Privacy Levels`
+<img width="1002" height="802" alt="image" src="https://github.com/user-attachments/assets/5f06615f-55e0-460d-a727-f6846357c2ae" />
+
 ## Preparing Input Data
+To use Flex Queries you have to prepare your data for export.  
+Before create Flex Queries please read documentation: https://www.ibkrguides.com/orgportal/performanceandstatements/flex.htm  
+You'll need a token to access reports outside from original website: https://www.ibkrguides.com/orgportal/performanceandstatements/flex-web-service.htm  
+Prepare five queries mentioned above. We recommend use 30-day period for each report - it will allow to get fresh data even if we skipped report refresh.  
+
 ## Import History Data
+To import history you have to run each flex query manually for each year thet you want to upload.  
+In the working directory create folder structure like next:  
+`WORK FOlDER\history\cash`  
+`WORK FOlDER\history\corporate_actions`  
+`WORK FOlDER\history\nav`  
+`WORK FOlDER\history\positions`  
+`WORK FOlDER\history\trades`  
+Save downloaded files into corresponding folder.  
