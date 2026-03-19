@@ -1,0 +1,6 @@
+import_cash_transactions.bat
+import_corporate_actions.bat
+import_nav.bat
+import_positions.bat
+import_tickers_yahoo.bat
+import_trades.bat
