@@ -36,6 +36,28 @@ def _job_result_to_phase_log(run_utc: dt.datetime, phase: str, res: JobResult) -
         rows=res.rows,
     )
 
+def _get_last_etl_run_utc(con) -> dt.datetime | None:
+    row = con.execute("""
+        SELECT MAX(run_utc) AS last_run_utc
+        FROM etl.job_runs
+        WHERE phase IN ('bronze', 'silver', 'gold', 'obfuscate')
+    """).fetchone()
+
+    return row[0] if row and row[0] is not None else None
+
+
+def _make_global_skip_row(run_utc: dt.datetime, reason: str) -> dict:
+    return {
+        "run_utc": run_utc,
+        "phase": "etl",
+        "job_id": "_system",
+        "query_id": None,
+        "status": "skipped",
+        "reason": reason,
+        "reference_code": None,
+        "report_date": None,
+        "rows": 0,
+    }
 
 def _phase_log_to_row(rec: PhaseLogRecord) -> dict:
     return {
@@ -168,8 +190,56 @@ def run_update(kit_root: str, config_path: str) -> pd.DataFrame:
     con = duckdb.connect(cfg.paths.duckdb_path)
     etl_ensure_meta(con)
 
-    ctx = JobContext(cfg=cfg, con=con)
     run_utc = dt.datetime.utcnow()
+
+    cooldown_minutes = getattr(cfg.etl, "min_minutes_between_etl_runs", 0)
+    if cooldown_minutes > 0:
+        last_run_utc = _get_last_etl_run_utc(con)
+
+        if last_run_utc is not None:
+            elapsed_seconds = (run_utc - last_run_utc).total_seconds()
+            required_seconds = cooldown_minutes * 60
+
+            if elapsed_seconds < required_seconds:
+                remaining_seconds = int(required_seconds - elapsed_seconds)
+                reason = (
+                    f"Global ETL cooldown active: "
+                    f"last run at {last_run_utc.isoformat()}, "
+                    f"cooldown={cooldown_minutes} min, "
+                    f"remaining={remaining_seconds} sec"
+                )
+
+                skip_row = _make_global_skip_row(run_utc, reason)
+
+                con.execute("""
+                    INSERT INTO etl.job_runs(
+                        run_utc,
+                        phase,
+                        job_id,
+                        query_id,
+                        status,
+                        reference_code,
+                        report_date,
+                        rows,
+                        error
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, [
+                    skip_row["run_utc"],
+                    skip_row["phase"],
+                    skip_row["job_id"],
+                    skip_row["query_id"],
+                    skip_row["status"],
+                    skip_row["reference_code"],
+                    skip_row["report_date"],
+                    skip_row["rows"],
+                    None,
+                ])
+
+                _export_status_gold(con, cfg.paths.gold_root)
+                return pd.DataFrame([skip_row])
+
+    ctx = JobContext(cfg=cfg, con=con)
     pause_seconds = getattr(cfg.etl, "pause_between_jobs_seconds", 3)
 
     jobs = _build_jobs(cfg)

@@ -23,6 +23,7 @@ def load_config(path: str) -> Config:
         max_wait_seconds=raw["etl"]["max_wait_seconds"],
         min_seconds_between_runs=raw["etl"]["min_seconds_between_runs"],
         pause_between_jobs_seconds=raw["etl"]["pause_between_jobs_seconds"],
+        min_minutes_between_etl_runs=raw["etl"]["min_minutes_between_etl_runs"],
         initial_wait_seconds=raw["etl"]["initial_wait_seconds"],
         bronze=bool(raw["etl"].get("bronze", True)),
         silver=bool(raw["etl"].get("silver", True)),

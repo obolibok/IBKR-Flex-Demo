@@ -5,9 +5,11 @@ ibkr:
 
 etl:
   poll_seconds: 10
-  max_wait_seconds: 300
+  max_wait_seconds: 60
   min_seconds_between_runs: 120
+  min_minutes_between_etl_runs: 5
   pause_between_jobs_seconds: 3
+  initial_wait_seconds: 3
   bronze: true
   silver: true
   gold: true

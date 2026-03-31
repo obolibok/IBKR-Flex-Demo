@@ -47,6 +47,7 @@ def cfg_load_config(config_path: str) -> Config:
             poll_seconds=int(etl.get("poll_seconds", 10)),
             max_wait_seconds=int(etl.get("max_wait_seconds", 300)),
             min_seconds_between_runs=int(etl.get("min_seconds_between_runs", 120)),
+            min_minutes_between_etl_runs=int(etl.get("min_minutes_between_etl_runs", 0)),
             pause_between_jobs_seconds=int(etl.get("pause_between_jobs_seconds", 10)),
             initial_wait_seconds=int(etl.get("initial_wait_seconds", 5)),
             bronze=bool(etl.get("bronze", True)),

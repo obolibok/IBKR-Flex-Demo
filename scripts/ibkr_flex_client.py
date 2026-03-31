@@ -192,6 +192,7 @@ def flex_download_statement(
     last_err = None
 
     for attempt in range(1, cycle_attempts + 1):
+        ref = None
         try:
             ref = flex_send_request(cfg, query_id=query_id)
             xml_bytes = flex_get_statement_wait_query(
@@ -205,10 +206,12 @@ def flex_download_statement(
             )
             print(f"[flex] query_id={query_id} attempt={attempt} ref={ref!r}")
             return xml_bytes, ref
+
         except RuntimeError as e:
             msg = str(e)
             last_err = msg
             print(f"[flex] query_id={query_id} attempt={attempt} error={msg} ref={ref!r}")
+
             restartable = (
                 "GetStatement restartable failure:" in msg
                 or " 1017 " in f" {msg} "
@@ -222,6 +225,7 @@ def flex_download_statement(
                 time.sleep(max(cycle_sleep_seconds, attempt * 5))
                 continue
 
-            raise
+            raise RuntimeError(msg) from e
 
     raise RuntimeError(f"Flex download failed after full-cycle retries: {last_err}")
+
