@@ -35,7 +35,11 @@ def import_positions_xml(con: duckdb.DuckDBPyConnection, xml_bytes: bytes, sourc
                     "position" DOUBLE,
                     markPrice DOUBLE,
                     positionValue DOUBLE,
+                    openPrice DOUBLE,
+                    costBasisPrice DOUBLE,
+                    costBasisMoney DOUBLE,
                     percentOfNAV DOUBLE,
+                    fifoPnlUnrealized DOUBLE,
                     side VARCHAR,
                     sourceHash VARCHAR);""")
 
@@ -45,8 +49,8 @@ def import_positions_xml(con: duckdb.DuckDBPyConnection, xml_bytes: bytes, sourc
         WHERE sourceHash IN (SELECT sourceHash FROM df_in);
     """)
 
-    con.execute("""INSERT INTO bronze.positions_snapshot (accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,percentOfNAV,side,sourceHash)
-                        SELECT accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,percentOfNAV,side,sourceHash
+    con.execute("""INSERT INTO bronze.positions_snapshot (accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,openPrice,costBasisPrice,costBasisMoney,percentOfNAV,fifoPnlUnrealized,side,sourceHash)
+                        SELECT accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,openPrice,costBasisPrice,costBasisMoney,percentOfNAV,fifoPnlUnrealized,side,sourceHash
                         FROM df_in;""")
 
     dates = con.execute("SELECT COUNT(DISTINCT reportDate) FROM df_in;").fetchone()[0]

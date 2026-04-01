@@ -44,7 +44,11 @@ class PositionsJob(FlexJob):
                     "position" DOUBLE,
                     markPrice DOUBLE,
                     positionValue DOUBLE,
+                    openPrice DOUBLE,
+                    costBasisPrice DOUBLE,
+                    costBasisMoney DOUBLE,
                     percentOfNAV DOUBLE,
+                    fifoPnlUnrealized DOUBLE,
                     side VARCHAR,
                     sourceHash VARCHAR);""")
         super().ensure_storage(ctx)
@@ -108,8 +112,8 @@ class PositionsJob(FlexJob):
             """)
 
             # 3) вставляем новый пакет
-            con.execute("""INSERT INTO bronze.positions_snapshot (accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,percentOfNAV,side,sourceHash)
-                        SELECT accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,percentOfNAV,side,sourceHash
+            con.execute("""INSERT INTO bronze.positions_snapshot (accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,openPrice,costBasisPrice,costBasisMoney,percentOfNAV,fifoPnlUnrealized,side,sourceHash)
+                        SELECT accountId,currency,fxRateToBase,assetCategory,subCategory,symbol,"description",conid,securityID,securityIDType,cusip,isin,listingExchange,multiplier,reportDate,"position",markPrice,positionValue,openPrice,costBasisPrice,costBasisMoney,percentOfNAV,fifoPnlUnrealized,side,sourceHash
                         FROM df_in;""")
 
             return JobResult(
@@ -156,7 +160,7 @@ class PositionsJob(FlexJob):
 
         con.execute(f"""
             COPY (
-                SELECT currency, fxRateToBase, assetCategory, subCategory, symbol, description, multiplier, reportDate, "position", markPrice, positionValue
+                SELECT currency, fxRateToBase, assetCategory, subCategory, symbol, description, multiplier, reportDate, "position", markPrice, positionValue, openPrice, costBasisPrice, costBasisMoney, percentOfNAV, fifoPnlUnrealized
                 FROM bronze.positions_snapshot
                 WHERE reportDate = (SELECT MAX(reportDate) FROM bronze.positions_snapshot)
             )
@@ -170,7 +174,7 @@ class PositionsJob(FlexJob):
 
         con.execute(f"""
             COPY (
-                SELECT COALESCE(b.map_to,a.symbol) AS symbol, currency, fxRateToBase, assetCategory, subCategory, multiplier, reportDate, "position", markPrice, positionValue
+                SELECT COALESCE(b.map_to,a.symbol) AS symbol, currency, fxRateToBase, assetCategory, subCategory, multiplier, reportDate, "position", markPrice, positionValue, openPrice, costBasisPrice, costBasisMoney, percentOfNAV, fifoPnlUnrealized
                 FROM bronze.positions_snapshot AS a
                 LEFT JOIN silver.symbols AS b on b.symbol=a.symbol and b.conid = a.conid and a.description = b.description
             )

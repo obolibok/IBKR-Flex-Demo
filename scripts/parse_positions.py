@@ -54,7 +54,11 @@ def parse_positions(xml_bytes: bytes) -> List[Dict[str, Any]]:
             "position": parse_decimal(a.get("position")),
             "markPrice": parse_decimal(a.get("markPrice")),
             "positionValue": parse_decimal(a.get("positionValue")),
+            "openPrice": parse_decimal(a.get("openPrice")),
+            "costBasisPrice": parse_decimal(a.get("costBasisPrice")),
+            "costBasisMoney": parse_decimal(a.get("costBasisMoney")),
             "percentOfNAV": parse_decimal(a.get("percentOfNAV")),
+            "fifoPnlUnrealized": parse_decimal(a.get("fifoPnlUnrealized")),
             "side": a.get("side"),
             "sourceHash": source_hash,
         }
